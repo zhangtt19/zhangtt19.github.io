@@ -14,3 +14,47 @@
   button.hidden = false;
   button.addEventListener('click', () => setLanguage(document.documentElement.lang === 'en' ? 'zh-CN' : 'en'));
 })();
+
+
+(() => {
+  const dialog = document.getElementById('figure-dialog');
+  const full = document.getElementById('figure-full');
+  const caption = document.getElementById('figure-caption');
+  const original = document.getElementById('figure-original');
+  let trigger;
+  document.querySelectorAll('[data-full]').forEach(button => {
+    button.addEventListener('click', () => {
+      trigger = button;
+      const text = document.documentElement.lang === 'zh-CN' ? button.dataset.captionZh : button.dataset.captionEn;
+      full.src = button.dataset.full;
+      full.alt = text;
+      caption.textContent = text;
+      original.href = button.dataset.full;
+      dialog.showModal();
+      document.body.classList.add('figure-open');
+    });
+  });
+  dialog.querySelector('.figure-close').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => {
+    const r = dialog.getBoundingClientRect();
+    if (e.target === dialog && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dialog.close();
+  });
+  dialog.addEventListener('close', () => {
+    document.body.classList.remove('figure-open');
+    if (trigger) trigger.focus();
+  });
+})();
+
+(() => {
+ const syncLabels = () => {
+  const zh = document.documentElement.lang === 'zh-CN';
+  document.querySelectorAll('[data-full]').forEach(button => {
+   const label = zh ? button.dataset.captionZh : button.dataset.captionEn;
+   button.setAttribute('aria-label', (zh ? '查看原图：' : 'View figure: ') + label);
+   button.querySelector('img').alt = label;
+  });
+  document.querySelector('.figure-close').setAttribute('aria-label', zh ? '关闭图片' : 'Close figure');
+ };
+ document.getElementById('language').addEventListener('click', syncLabels);
+ syncLabels();
+})();
